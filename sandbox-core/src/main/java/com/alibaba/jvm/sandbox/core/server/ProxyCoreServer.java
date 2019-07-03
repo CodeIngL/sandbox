@@ -9,8 +9,7 @@ import java.net.InetSocketAddress;
 
 public class ProxyCoreServer implements CoreServer {
 
-    private final static Class<? extends CoreServer> classOfCoreServerImpl
-            = JettyCoreServer.class;
+    private final static Class<? extends CoreServer> classOfCoreServerImpl = JettyCoreServer.class;
 
     private final CoreServer proxy;
 
@@ -51,11 +50,7 @@ public class ProxyCoreServer implements CoreServer {
 
     public static CoreServer getInstance() {
         try {
-            return new ProxyCoreServer(
-                    (CoreServer) classOfCoreServerImpl
-                            .getMethod("getInstance")
-                            .invoke(null)
-            );
+            return new ProxyCoreServer((CoreServer) classOfCoreServerImpl.getMethod("getInstance").invoke(null));
         } catch (Throwable cause) {
             throw new RuntimeException(cause);
         }

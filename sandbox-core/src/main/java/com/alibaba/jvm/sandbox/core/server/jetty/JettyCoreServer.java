@@ -92,8 +92,7 @@ public class JettyCoreServer implements CoreServer {
 
     @Override
     public InetSocketAddress getLocal() throws IOException {
-        if (!isBind()
-                || null == httpServer) {
+        if (!isBind() || null == httpServer) {
             throw new IOException("server was not bind yet.");
         }
 
@@ -133,18 +132,12 @@ public class JettyCoreServer implements CoreServer {
         final String wsPathSpec = "/module/websocket/*";
         logger.info("initializing ws-http-handler. path={}", contextPath + wsPathSpec);
         //noinspection deprecation
-        context.addServlet(
-                new ServletHolder(new WebSocketAcceptorServlet(jvmSandbox.getCoreModuleManager())),
-                wsPathSpec
-        );
+        context.addServlet(new ServletHolder(new WebSocketAcceptorServlet(jvmSandbox.getCoreModuleManager())), wsPathSpec);
 
         // module-http-servlet
         final String pathSpec = "/module/http/*";
         logger.info("initializing http-handler. path={}", contextPath + pathSpec);
-        context.addServlet(
-                new ServletHolder(new ModuleHttpServlet(jvmSandbox.getCoreModuleManager())),
-                pathSpec
-        );
+        context.addServlet(new ServletHolder(new ModuleHttpServlet(jvmSandbox.getCoreModuleManager())), pathSpec);
 
         httpServer.setHandler(context);
     }
@@ -179,10 +172,7 @@ public class JettyCoreServer implements CoreServer {
             initializer.initProcess(new Initializer.Processor() {
                 @Override
                 public void process() throws Throwable {
-                    LogbackUtils.init(
-                            cfg.getNamespace(),
-                            cfg.getCfgLibPath() + File.separator + "sandbox-logback.xml"
-                    );
+                    LogbackUtils.init(cfg.getNamespace(), cfg.getCfgLibPath() + File.separator + "sandbox-logback.xml");
                     logger.info("initializing server. cfg={}", cfg);
                     jvmSandbox = new JvmSandbox(cfg, inst);
                     initHttpServer();
@@ -199,10 +189,7 @@ public class JettyCoreServer implements CoreServer {
             }
 
             final InetSocketAddress local = getLocal();
-            logger.info("initialized server. actual bind to {}:{}",
-                    local.getHostName(),
-                    local.getPort()
-            );
+            logger.info("initialized server. actual bind to {}:{}", local.getHostName(), local.getPort());
 
         } catch (Throwable cause) {
 
