@@ -24,8 +24,7 @@ public class LogbackUtils {
      * @param namespace          命名空间
      * @param logbackCfgFilePath logback配置文件路径
      */
-    public static void init(final String namespace,
-                            final String logbackCfgFilePath) {
+    public static void init(final String namespace, final String logbackCfgFilePath) {
         final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         final JoranConfigurator configurator = new JoranConfigurator();
         final File configureFile = new File(logbackCfgFilePath);

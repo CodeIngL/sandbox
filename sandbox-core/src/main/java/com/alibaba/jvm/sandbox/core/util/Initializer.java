@@ -83,14 +83,11 @@ public class Initializer {
     public final void initProcess(final Processor processor) throws Throwable {
         rwLock.writeLock().lock();
         try {
-
             if (State.NEW != state) {
                 throw new IllegalStateException("init process fail, because state != NEW");
             }
-
             processor.process();
             state = State.INITIALIZED;
-
         } finally {
             rwLock.writeLock().unlock();
         }
