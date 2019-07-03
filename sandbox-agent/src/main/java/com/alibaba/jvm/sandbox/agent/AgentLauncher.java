@@ -31,10 +31,12 @@ public class AgentLauncher {
         return sandboxHome + File.separatorChar + "module";
     }
 
+    // SANDBOX_CORE_JAR_PATH
     private static String getSandboxCoreJarPath(String sandboxHome) {
         return sandboxHome + File.separatorChar + "lib" + File.separator + "sandbox-core.jar";
     }
 
+    // SANDBOX_SPY_JAR_PATH
     private static String getSandboxSpyJarPath(String sandboxHome) {
         return sandboxHome + File.separatorChar + "lib" + File.separator + "sandbox-spy.jar";
     }
@@ -68,8 +70,7 @@ public class AgentLauncher {
     private static String LAUNCH_MODE;
 
     // agentmain上来的结果输出到文件${HOME}/.sandbox.token
-    private static final String RESULT_FILE_PATH = System.getProperties().getProperty("user.home")
-            + File.separator + ".sandbox.token";
+    private static final String RESULT_FILE_PATH = System.getProperties().getProperty("user.home") + File.separator + ".sandbox.token";
 
     // 全局持有ClassLoader用于隔离sandbox实现
     private static volatile Map<String/*NAMESPACE*/, SandboxClassLoader> sandboxClassLoaderMap
@@ -102,15 +103,11 @@ public class AgentLauncher {
     public static void agentmain(String featureString, Instrumentation inst) {
         LAUNCH_MODE = LAUNCH_MODE_ATTACH;
         final Map<String, String> featureMap = toFeatureMap(featureString);
-        writeAttachResult(
-                getNamespace(featureMap),
-                getToken(featureMap),
-                install(featureMap, inst)
-        );
+        writeAttachResult(getNamespace(featureMap), getToken(featureMap), install(featureMap, inst));
     }
 
     /**
-     * 写入本次attach的结果
+     * 写入本次attach的结果,写入文件中
      * <p>
      * NAMESPACE;TOKEN;IP;PORT
      * </p>
@@ -124,22 +121,13 @@ public class AgentLauncher {
                                                        final InetSocketAddress local) {
         final File file = new File(RESULT_FILE_PATH);
 
-        if (file.exists()
-                && (!file.isFile()
-                || !file.canWrite())) {
+        if (file.exists() && (!file.isFile() || !file.canWrite())) {
             throw new RuntimeException("write to result file : " + file + " failed.");
         } else {
             FileWriter fw = null;
             try {
                 fw = new FileWriter(file, true);
-                fw.append(
-                        format("%s;%s;%s;%s\n",
-                                namespace,
-                                token,
-                                local.getHostName(),
-                                local.getPort()
-                        )
-                );
+                fw.append(format("%s;%s;%s;%s\n", namespace, token, local.getHostName(), local.getPort()));
                 fw.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -159,20 +147,14 @@ public class AgentLauncher {
     private static synchronized ClassLoader loadOrDefineClassLoader(final String namespace,
                                                                     final String coreJar) throws Throwable {
 
-        final SandboxClassLoader classLoader;
 
         // 如果已经被启动则返回之前启动的ClassLoader
-        if (sandboxClassLoaderMap.containsKey(namespace)
-                && null != sandboxClassLoaderMap.get(namespace)) {
-            classLoader = sandboxClassLoaderMap.get(namespace);
+        if (sandboxClassLoaderMap.containsKey(namespace) && null != sandboxClassLoaderMap.get(namespace)) {
+            return sandboxClassLoaderMap.get(namespace);
         }
-
         // 如果未启动则重新加载
-        else {
-            classLoader = new SandboxClassLoader(namespace, coreJar);
-            sandboxClassLoaderMap.put(namespace, classLoader);
-        }
-
+        final SandboxClassLoader classLoader = new SandboxClassLoader(namespace, coreJar);
+        sandboxClassLoaderMap.put(namespace, classLoader);
         return classLoader;
     }
 
@@ -212,59 +194,47 @@ public class AgentLauncher {
         final String namespace = getNamespace(featureMap);
         final String propertiesFilePath = getPropertiesFilePath(featureMap);
         final String coreFeatureString = toFeatureString(featureMap);
+        final String sandboxHome = getSandboxHome(featureMap);
 
         try {
 
-            // 将Spy注入到BootstrapClassLoader
-            inst.appendToBootstrapClassLoaderSearch(new JarFile(new File(
-                    getSandboxSpyJarPath(getSandboxHome(featureMap))
-                    // SANDBOX_SPY_JAR_PATH
-            )));
+            // 将sandbox-spy注入到BootstrapClassLoader
+            inst.appendToBootstrapClassLoaderSearch(new JarFile(new File(getSandboxSpyJarPath(sandboxHome))));
 
             // 构造自定义的类加载器，尽量减少Sandbox对现有工程的侵蚀
-            final ClassLoader sandboxClassLoader = loadOrDefineClassLoader(
-                    namespace,
-                    getSandboxCoreJarPath(getSandboxHome(featureMap))
-                    // SANDBOX_CORE_JAR_PATH
-            );
+            final ClassLoader sandboxClassLoader = loadOrDefineClassLoader(namespace, getSandboxCoreJarPath(sandboxHome));
+
+            // 处理CoreConfigure
 
             // CoreConfigure类定义
             final Class<?> classOfConfigure = sandboxClassLoader.loadClass(CLASS_OF_CORE_CONFIGURE);
 
-            // 反序列化成CoreConfigure类实例
+            // 反序列化成CoreConfigure类实例,调用toConfigure方法
             final Object objectOfCoreConfigure = classOfConfigure.getMethod("toConfigure", String.class, String.class)
                     .invoke(null, coreFeatureString, propertiesFilePath);
+
+            // 处理CoreServer
 
             // CoreServer类定义
             final Class<?> classOfProxyServer = sandboxClassLoader.loadClass(CLASS_OF_PROXY_CORE_SERVER);
 
             // 获取CoreServer单例
-            final Object objectOfProxyServer = classOfProxyServer
-                    .getMethod("getInstance")
-                    .invoke(null);
+            final Object objectOfProxyServer = classOfProxyServer.getMethod("getInstance").invoke(null);
 
             // CoreServer.isBind()
             final boolean isBind = (Boolean) classOfProxyServer.getMethod("isBind").invoke(objectOfProxyServer);
 
-
             // 如果未绑定,则需要绑定一个地址
             if (!isBind) {
                 try {
-                    classOfProxyServer
-                            .getMethod("bind", classOfConfigure, Instrumentation.class)
-                            .invoke(objectOfProxyServer, objectOfCoreConfigure, inst);
+                    classOfProxyServer.getMethod("bind", classOfConfigure, Instrumentation.class).invoke(objectOfProxyServer, objectOfCoreConfigure, inst);
                 } catch (Throwable t) {
                     classOfProxyServer.getMethod("destroy").invoke(objectOfProxyServer);
                     throw t;
                 }
-
             }
-
             // 返回服务器绑定的地址
-            return (InetSocketAddress) classOfProxyServer
-                    .getMethod("getLocal")
-                    .invoke(objectOfProxyServer);
-
+            return (InetSocketAddress) classOfProxyServer.getMethod("getLocal").invoke(objectOfProxyServer);
 
         } catch (Throwable cause) {
             throw new RuntimeException("sandbox attach failed.", cause);
@@ -309,6 +279,11 @@ public class AgentLauncher {
                 : defaultString;
     }
 
+    /**
+     * 转换为键值对
+     * @param featureString
+     * @return
+     */
     private static Map<String, String> toFeatureMap(final String featureString) {
         final Map<String, String> featureMap = new LinkedHashMap<String, String>();
 
