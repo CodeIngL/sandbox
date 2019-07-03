@@ -32,12 +32,10 @@ public class CoreModule {
     private final Module module;
 
     // 模块的类转换器
-    private final Set<SandboxClassFileTransformer> sandboxClassFileTransformers
-            = new LinkedHashSet<SandboxClassFileTransformer>();
+    private final Set<SandboxClassFileTransformer> sandboxClassFileTransformers = new LinkedHashSet<SandboxClassFileTransformer>();
 
     // 模块所持有的可释放资源
-    private final List<ReleaseResource<?>> releaseResources
-            = new ArrayList<ReleaseResource<?>>();
+    private final List<ReleaseResource<?>> releaseResources = new ArrayList<ReleaseResource<?>>();
 
     // 是否已经激活
     private boolean isActivated;
@@ -53,10 +51,7 @@ public class CoreModule {
      * @param loader   模块加载ClassLoader
      * @param module   模块
      */
-    public CoreModule(final String uniqueId,
-                      final File jarFile,
-                      final ModuleJarClassLoader loader,
-                      final Module module) {
+    public CoreModule(final String uniqueId, final File jarFile, final ModuleJarClassLoader loader, final Module module) {
         this.uniqueId = uniqueId;
         this.jarFile = jarFile;
         this.loader = loader;
@@ -193,8 +188,7 @@ public class CoreModule {
      * @return 资源实体本身
      */
     public <T> T append(ReleaseResource<T> resource) {
-        if (null == resource
-                || null == resource.get()) {
+        if (null == resource || null == resource.get()) {
             return null;
         }
         releaseResources.add(resource);
