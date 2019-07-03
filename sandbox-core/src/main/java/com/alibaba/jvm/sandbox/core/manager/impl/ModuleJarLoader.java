@@ -129,8 +129,7 @@ class ModuleJarLoader {
             }
 
         } finally {
-            if (!hasModuleLoadedSuccessFlag
-                    && null != moduleJarClassLoader) {
+            if (!hasModuleLoadedSuccessFlag && null != moduleJarClassLoader) {
                 logger.warn("loading module-jar completed, but NONE module loaded, will be close ModuleJarClassLoader. module-jar={};", moduleJarFile);
                 moduleJarClassLoader.closeIfPossible();
             }

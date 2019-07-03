@@ -65,11 +65,8 @@ public class DefaultCoreModuleManager implements CoreModuleManager {
         this.classDataSource = classDataSource;
         this.providerManager = providerManager;
 
-        // 初始化模块目录
-        this.moduleLibDirArray = mergeFileArray(
-                new File[]{new File(cfg.getSystemModuleLibPath())},
-                cfg.getUserModuleLibFilesWithCache()
-        );
+        // 初始化模块目录包括系统目录和用户目录
+        this.moduleLibDirArray = mergeFileArray(new File[]{new File(cfg.getSystemModuleLibPath())}, cfg.getUserModuleLibFilesWithCache());
     }
 
     private File[] mergeFileArray(File[] aFileArray, File[] bFileArray) {
@@ -344,10 +341,7 @@ public class DefaultCoreModuleManager implements CoreModuleManager {
             return coreModule;
         }
 
-        logger.info("unloading module, module={};class={};",
-                coreModule.getUniqueId(),
-                coreModule.getModule().getClass().getName()
-        );
+        logger.info("unloading module, module={};class={};", coreModule.getUniqueId(), coreModule.getModule().getClass().getName());
 
         // 尝试冻结模块
         frozen(coreModule, isIgnoreModuleException);
@@ -441,11 +435,7 @@ public class DefaultCoreModuleManager implements CoreModuleManager {
             return;
         }
 
-        logger.info("frozen module, module={};class={};module-jar={};",
-                coreModule.getUniqueId(),
-                coreModule.getModule().getClass().getName(),
-                coreModule.getJarFile()
-        );
+        logger.info("frozen module, module={};class={};module-jar={};", coreModule.getUniqueId(), coreModule.getModule().getClass().getName(), coreModule.getJarFile());
 
         // 通知生命周期
         try {
@@ -587,10 +577,7 @@ public class DefaultCoreModuleManager implements CoreModuleManager {
             // 对模块访问权限进行校验
             if (moduleLibDir.exists() && moduleLibDir.canRead()) {
                 new ModuleLibLoader(moduleLibDir, cfg.getLaunchMode())
-                        .load(
-                                new InnerModuleJarLoadCallback(),
-                                new InnerModuleLoadCallback()
-                        );
+                        .load(new InnerModuleJarLoadCallback(), new InnerModuleLoadCallback());
             } else {
                 logger.warn("module-lib not access, ignore flush load this lib. path={}", moduleLibDir);
             }
