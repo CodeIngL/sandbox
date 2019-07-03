@@ -14,13 +14,24 @@ import java.lang.instrument.Instrumentation;
  */
 public class JvmSandbox {
 
+    /**
+     * 配置类
+     */
     private final CoreConfigure cfg;
+    /**
+     * 模块划分
+     */
     private final CoreModuleManager coreModuleManager;
 
-    public JvmSandbox(final CoreConfigure cfg,
-                      final Instrumentation inst) {
+    /**
+     * 构建沙箱
+     * @param cfg
+     * @param inst
+     */
+    public JvmSandbox(final CoreConfigure cfg, final Instrumentation inst) {
         EventListenerHandlers.getSingleton();
         this.cfg = cfg;
+        //构建core模块的管理器
         this.coreModuleManager = new DefaultCoreModuleManager(
                 cfg,
                 inst,
