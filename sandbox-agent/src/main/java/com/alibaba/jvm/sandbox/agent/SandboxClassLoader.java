@@ -16,11 +16,12 @@ import java.util.jar.JarFile;
  */
 class SandboxClassLoader extends URLClassLoader {
 
+    //所属的命名空间
     private final String namespace;
+    //classloader能识别的路径
     private final String path;
 
-    SandboxClassLoader(final String namespace,
-                       final String sandboxCoreJarFilePath) throws MalformedURLException {
+    SandboxClassLoader(final String namespace, final String sandboxCoreJarFilePath) throws MalformedURLException {
         super(new URL[]{new URL("file:" + sandboxCoreJarFilePath)});
         this.namespace = namespace;
         this.path = sandboxCoreJarFilePath;
