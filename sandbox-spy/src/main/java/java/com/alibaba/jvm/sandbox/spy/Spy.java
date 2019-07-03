@@ -30,8 +30,8 @@ public class Spy {
 
     private static final Class<Spy.Ret> SPY_RET_CLASS = Spy.Ret.class;
 
-    private static final Map<String, MethodHook> namespaceMethodHookMap
-            = new ConcurrentHashMap<String, MethodHook>();
+    //命名空间和对应的methodHook钩子映射
+    private static final Map<String, MethodHook> namespaceMethodHookMap = new ConcurrentHashMap<String, MethodHook>();
 
     /**
      * 判断间谍类是否已经完成初始化
