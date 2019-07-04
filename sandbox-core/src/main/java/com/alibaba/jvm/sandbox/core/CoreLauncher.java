@@ -15,17 +15,12 @@ public class CoreLauncher {
     /**
      * 核心启动器
      * @param targetJvmPid 目标应用的pid
-     * @param agentJarPath sandbox-agent的路径
+     * @param agentJarPath sandbox-agent的路径，"xxx/sandbox-agent.jar"
      * @param token token其他信息，主要是其他配置信息，以前只有一个token
      * @throws Exception
      */
-    public CoreLauncher(final String targetJvmPid,
-                        final String agentJarPath,
-                        final String token) throws Exception {
-
-        // 加载agent
-        attachAgent(targetJvmPid, agentJarPath, token);
-
+    public CoreLauncher(final String targetJvmPid, final String agentJarPath, final String token) throws Exception {
+        attachAgent(targetJvmPid, agentJarPath, token);// 加载agent
     }
 
     /**
@@ -60,18 +55,13 @@ public class CoreLauncher {
      * @param cfg 配置信息
      * @throws Exception
      */
-    private void attachAgent(final String targetJvmPid,
-                             final String agentJarPath,
-                             final String cfg) throws Exception {
-
+    private void attachAgent(final String targetJvmPid, final String agentJarPath, final String cfg) throws Exception {
         VirtualMachine vmObj = null;
         try {
-            //attach对面
-            vmObj = VirtualMachine.attach(targetJvmPid);
+            vmObj = VirtualMachine.attach(targetJvmPid);//attach目标进程
             if (vmObj != null) {
-                vmObj.loadAgent(agentJarPath, cfg);
+                vmObj.loadAgent(agentJarPath, cfg); //loadAgent,这个agent就是sandbox-agent.jar。cfg为相关配置
             }
-
         } finally {
             if (null != vmObj) {
                 vmObj.detach();
