@@ -18,11 +18,11 @@ class SandboxClassLoader extends URLClassLoader {
 
     //所属的命名空间
     private final String namespace;
-    //classloader能识别的路径
+    //classloader能识别的路径,core所在路径，就一个jar，
     private final String path;
 
     SandboxClassLoader(final String namespace, final String sandboxCoreJarFilePath) throws MalformedURLException {
-        super(new URL[]{new URL("file:" + sandboxCoreJarFilePath)});
+        super(new URL[]{new URL("file:" + sandboxCoreJarFilePath)}); //我们构建jar让其识别
         this.namespace = namespace;
         this.path = sandboxCoreJarFilePath;
     }
