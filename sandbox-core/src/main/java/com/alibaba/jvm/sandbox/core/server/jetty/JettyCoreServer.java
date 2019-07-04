@@ -26,7 +26,7 @@ import static java.lang.String.format;
 import static org.eclipse.jetty.servlet.ServletContextHandler.NO_SESSIONS;
 
 /**
- * Jetty实现的Http服务器
+ * Jetty实现的Http服务器，用于暴露在attach目标进程内部，用于完成通信
  *
  * @author luanjia@taobao.com
  */
@@ -34,6 +34,7 @@ public class JettyCoreServer implements CoreServer {
 
     private static volatile CoreServer coreServer;
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    //初始化器绑定的时候，进行初始化
     private final Initializer initializer = new Initializer(true);
 
     private Server httpServer;
