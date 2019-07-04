@@ -41,8 +41,7 @@ public class FeatureCodec {
     public FeatureCodec(final char kvSegmentSeparator, final char kvSeparator) {
 
         // 分隔符禁止与转义前缀符相等
-        if (ESCAPE_PREFIX_CHAR == kvSegmentSeparator
-                || ESCAPE_PREFIX_CHAR == kvSeparator) {
+        if (ESCAPE_PREFIX_CHAR == kvSegmentSeparator || ESCAPE_PREFIX_CHAR == kvSeparator) {
             throw new IllegalArgumentException("separator can not equals '" + ESCAPE_PREFIX_CHAR + "'.");
         }
 

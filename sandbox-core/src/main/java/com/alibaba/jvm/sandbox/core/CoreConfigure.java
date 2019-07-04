@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * 内核启动配置
+ * 内核启动配置，核心的配置和应用程序进行共生，由sandboxclassloader加载
  * Created by luanjia@taobao.com on 16/10/2.
  */
 public class CoreConfigure {
@@ -42,6 +42,7 @@ public class CoreConfigure {
     // 用户配置和系统默认配置都可以，需要进行合并的key，例如user_module
     private static final String[] MULTI_KEY_ARRAY = {KEY_USER_MODULE_LIB_PATH};
 
+    //段分隔符和分隔符
     private static final FeatureCodec codec = new FeatureCodec(';', '=');
 
     private final Map<String, String> featureMap;
@@ -52,6 +53,7 @@ public class CoreConfigure {
 
     private static volatile CoreConfigure instance;
 
+    //构建一个classLoader中的实例
     public static CoreConfigure toConfigure(final String featureString, final String propertiesFilePath) {
         return instance = mergePropertiesFile(new CoreConfigure(featureString), propertiesFilePath);
     }
